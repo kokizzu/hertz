@@ -7,7 +7,7 @@ jobs:
     strategy:
       matrix:
         version: ["1.17", "1.18", "1.19"]
-    runs-on: [self-hosted, X64]
+    runs-on: [self-hosted, Linux, X64]
     steps:
       - uses: actions/checkout@v4
       - name: Set up Go
@@ -24,7 +24,7 @@ jobs:
     strategy:
       matrix:
         version: ["1.20", "1.21", "1.22", "1.23"]
-    runs-on: [self-hosted, X64]
+    runs-on: [self-hosted, Linux, X64]
     steps:
       - uses: actions/checkout@v4
       - name: Set up Go
@@ -34,29 +34,39 @@ jobs:
           cache: false # don't use cache for self-hosted runners
 
       - name: Unit Test
-        run: go test -race -covermode=atomic -coverprofile=coverage.txt ./...
+        run: go test -race ./...
+
+  ut-windows:
+    runs-on: [self-hosted, Windows]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: false # don't use cache for self-hosted runners
+
+      - name: Unit Test
+        run: go test -race ./...
+
+  code-cov:
+    runs-on: [self-hosted, Linux, X64]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: false # don't use cache for self-hosted runners
+
+      - name: Unit Test
+        run: go test -covermode=atomic -coverprofile=coverage.txt ./...
 
       - name: Codecov
         run: bash <(curl -s https://codecov.io/bash)
 
-  ut-windows:
-    strategy:
-      matrix:
-        version: ["1.20", "1.21", "1.22", "1.23"]
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: ${{ matrix.version }}
-          cache: false # don't use cache for self-hosted runners
-
-      - name: Unit Test
-        run: go test -race -covermode=atomic  ./...
-
   hz-test-unix:
-    runs-on: [ self-hosted, X64 ]
+    runs-on: [ self-hosted, Linux, X64 ]
     steps:
       - uses: actions/checkout@v4
       - name: Set up Go
